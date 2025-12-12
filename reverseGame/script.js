@@ -1,95 +1,126 @@
+// Get elements
 const challengeInput = document.getElementById("challenge");
 const userInput = document.getElementById("user-input");
 const timerElement = document.getElementById("timer");
-const messageElement= document.getElementById("message");
-const levelElement= document.getElementById("level");
-const restartBtn= document.getElementById("restart-btn");
-const submitBtn= document.getElementById("submit-btn");
+const messageElement = document.getElementById("message");
+const levelElement = document.getElementById("level");
+const restartBtn = document.getElementById("restart-btn");
+const submitBtn = document.getElementById("submit-btn");
 
-const months= ["January", "February", "March", "April", "May","June","July",
-               "August", "September", "October","November","December"];
-const numbers=["one","two","three","four","five","six","seven","eight","nine","ten"];
+// Arrays
+const months = ["January", "February", "March", "April", "May", "June", "July",
+"August", "September", "October", "November", "December"];
 
-let level=1;
-let challengeText= "";
-let timeLeft= 45;
+const numbers = ["one", "two", "three", "four", "five", "six", "seven", "eight",
+"nine", "ten"];
+
+const colors = ["red", "blue", "green", "yellow", "purple", "orange", "black", "white"];
+
+// Game variables
+let level = 1;
+let challengeText = "";
+let timeLeft = 45;
 let timerInterval;
 
+// Start game
+function startGame() {
+    level = 1;
+    timeLeft = 45;
 
-function startGame(){
-    level=1;
-    timeLeft=45;
-    levelElement.textContent= level;
+    levelElement.textContent = level;
     restartBtn.classList.add("hidden");
     submitBtn.classList.remove("hidden");
-    userInput.value="";
-    messageElement.textContent="";
+
+    userInput.value = "";
+    messageElement.textContent = "";
+
     setChallengeText();
     startTimer();
 }
 
+// Random element helper
+function getRandomElement(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
 
-function setChallengeText(){
-    if (level==1){
-        challengeText= getRandomElement(months);
-    }else if(level==2){
-        challengeText= get(months)+getRandomElement(numbers);
+// Set challenge text based on level
+function setChallengeText() {
+    if (level === 1) {
+        challengeText = getRandomElement(months);
+    } 
+    else if (level === 2) {
+        challengeText = getRandomElement(months) + " " + getRandomElement(numbers);
     }
-    challengeInput.value=challengeText;
+    else if (level === 3) {
+        challengeText =
+            getRandomElement(months) + " " +
+            getRandomElement(numbers) + " " +
+            getRandomElement(colors);
+    }
+
+    challengeInput.value = challengeText;
 }
 
-
-function getRandomElement(array){
-    return array[Math.floor(Math.random()*array.length)];
-}
-
-
-function startTimer(){
+// Timer
+function startTimer() {
     clearInterval(timerInterval);
-    timerInterval= setInterval(()=>{
+
+    timerInterval = setInterval(() => {
         timeLeft--;
-        timerElement.textContent=timeLeft;
-        if(timeLeft<=0){
+        timerElement.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
             clearInterval(timerInterval);
             endgame(false);
         }
     }, 1000);
 }
 
-function endgame(){
+// End game
+function endgame(won) {
     clearInterval(timerInterval);
-    if(won){
-        messageElement.textContent= "Congrulations! You won the game!";
-        messageElement.style.color= 'green';
-    }else{
-        messageElement.textContent= "Time's up! You lost the game.";
-        messageElement.style.color= 'red';
+
+    if (won) {
+        messageElement.textContent = "Congratulations! You won the game!";
+        messageElement.style.color = "green";
+    } else {
+        messageElement.textContent = "Time's up! You lost the game.";
+        messageElement.style.color = "red";
     }
+
     restartBtn.classList.remove("hidden");
     submitBtn.classList.add("hidden");
 }
 
-submitBtn.addEventListener("click", () =>{
-    const reversedText= userInput.value;
-    const correctReversedText= challengeText.split("").reverse().join("");
-    if (reversedText=== correctReversedText){
-        if(level===2){
+// Submit button logic
+submitBtn.addEventListener("click", () => {
+    const reversedText = userInput.value;
+    const correctReversedText = challengeText.split("").reverse().join("");
+
+    if (reversedText === correctReversedText) {
+
+        if (level === 3) {
             endgame(true);
-        }else{
+        } else {
             level++;
-            timeLeft=45;
-            levelElement.textContent= level;
-            messageElement.textContent="Correct! Moving to the next level.";
-            messageElement.style.color='green';
-            userInput.value= "";
+            timeLeft = 45;
+
+            levelElement.textContent = level;
+            messageElement.textContent = "Correct! Moving to the next level.";
+            messageElement.style.color = "green";
+
+            userInput.value = "";
             setChallengeText();
         }
-    }else{
-        messageElement.textContent= "Incorrect! Try again.";
-        messageElement.style.color= 'red';
+
+    } else {
+        messageElement.textContent = "Incorrect! Try again.";
+        messageElement.style.color = "red";
     }
 });
 
+// Restart button
 restartBtn.addEventListener("click", startGame);
 
+// Start game on load
 startGame();
