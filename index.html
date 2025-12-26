@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Application Form</title>
+</head>
+<body>
+  <h2>Job Application Form</h2>
+
+  <form id="applicationForm">
+
+    <!-- TCKN -->
+    <div>
+      <label for="tckn">TCKN</label><br>
+      <input type="text" id="tckn" name="tckn" placeholder="11-digit Turkish ID number" required>
+      <p id="tckn_result"></p>
+    </div><br>
+
+    <!-- Full Name -->
+    <div>
+      <label for="fullName">Full Name</label><br>
+      <input type="text" id="fullName" name="fullName" placeholder="Name Surname" required>
+      <p id="fullName_result"></p>
+    </div><br>
+
+    <!-- Date of Birth -->
+    <div>
+      <label for="dob">Date of Birth</label><br>
+      <input type="date" id="dob" name="dob" required>
+      <p id="dob_result"></p>
+    </div><br>
+
+    <!-- Gender -->
+    <div>
+      <label>Gender</label><br>
+      <input type="radio" id="male" name="gender" value="Male" required>
+      <label for="male">Male</label><br>
+      <input type="radio" id="female" name="gender" value="Female" required>
+      <label for="female">Female</label>
+    </div><br>
+
+    <!-- Skills -->
+    <div>
+      <label>Skills (Optional)</label><br>
+      <input type="checkbox" id="java" name="skills" value="Java"><label for="java">Java</label><br>
+      <input type="checkbox" id="javascript" name="skills" value="JavaScript"><label for="javascript">JavaScript</label><br>
+      <input type="checkbox" id="python" name="skills" value="Python"><label for="python">Python</label><br>
+      <input type="checkbox" id="cpp" name="skills" value="C++"><label for="cpp">C++</label><br>
+      <input type="checkbox" id="csharp" name="skills" value="C#"><label for="csharp">C#</label>
+    </div><br>
+
+    <!-- Salary Type -->
+    <div>
+      <label for="salaryType">Salary Type</label><br>
+      <select id="salaryType" name="salaryType" required>
+        <option value="">Select salary type</option>
+        <option value="Gross">Gross</option>
+        <option value="Net">Net</option>
+      </select>
+    </div><br>
+
+    <!-- Salary Amount -->
+    <div>
+      <label for="salaryAmount">Salary Expectation</label><br>
+      <input type="number" id="salaryAmount" name="salaryAmount" placeholder="Monthly amount" required>
+      <p id="salary_result"></p>
+    </div><br>
+
+    <!-- Experience -->
+    <div>
+      <label for="experience">Years of Experience</label><br>
+      <input type="number" id="experience" name="experience" placeholder="0 or more" required>
+      <p id="experience_result"></p>
+    </div><br>
+
+    <!-- Submit -->
+    <div>
+      <button type="submit">Submit Application</button>
+    </div>
+  </form>
+
+  <p id="submit_result"></p>
+
+  <!-- Preview Box -->
+  <textarea id="previewBox" readonly rows="10" cols="50"></textarea>
+
+  <!-- Import JS files -->
+  <script src="TCKN_validation.js"></script>
+  <script src="FullName_validation.js"></script>
+  <script src="DOB_validation.js"></script>
+  <script src="Salary_validation.js"></script>
+  <script src="Experience_validation.js"></script>
+
+  <script>
+    // Blur event handlers
+    document.getElementById("tckn").addEventListener("blur", function() {
+      let val = this.value;
+      document.getElementById("tckn_result").textContent =
+        val === "" ? "This field cannot be empty!" :
+        (isValidTCKN(val) ? "TCKN is valid." : "Invalid TCKN.");
+    });
+
+    document.getElementById("fullName").addEventListener("blur", function() {
+      let val = this.value;
+      document.getElementById("fullName_result").textContent =
+        isValidFullName(val) ? "Full name is valid." : "Invalid full name.";
+    });
+
+    document.getElementById("dob").addEventListener("blur", function() {
+      let val = this.value;
+      document.getElementById("dob_result").textContent =
+        isValidDOB(val) ? "Date of birth is valid." : "Invalid age range.";
+    });
+
+    document.getElementById("salaryAmount").addEventListener("blur", function() {
+      let val = this.value;
+      document.getElementById("salary_result").textContent =
+        isValidSalary(val) ? "Salary is valid." : "Salary cannot be negative.";
+    });
+
+    document.getElementById("experience").addEventListener("blur", function() {
+      let val = this.value;
+      let dobVal = document.getElementById("dob").value;
+      document.getElementById("experience_result").textContent =
+        isValidExperience(val, dobVal) ? "Experience is valid." : "Invalid experience.";
+    });
+
+    // Submit handler
+    document.getElementById("applicationForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      let tckn = document.getElementById("tckn").value;
+      let fullName = document.getElementById("fullName").value;
+      let dob = document.getElementById("dob").value;
+      let salaryAmount = document.getElementById("salaryAmount").value;
+      let experience = document.getElementById("experience").value;
+
+      if (!isValidTCKN(tckn)) { document.getElementById("tckn").focus(); return reject(); }
+      if (!isValidFullName(fullName)) { document.getElementById("fullName").focus(); return reject(); }
+      if (!isValidDOB(dob)) { document.getElementById("dob").focus(); return reject(); }
+      if (!isValidSalary(salaryAmount)) { document.getElementById("salaryAmount").focus(); return reject(); }
+      if (!isValidExperience(experience, dob)) { document.getElementById("experience").focus(); return reject(); }
+
+      // Accepted
+      document.getElementById("submit_result").textContent = "Application accepted.";
+      let age = computeAge(dob);
+      let gender = document.querySelector('input[name="gender"]:checked').value;
+      let skills = Array.from(document.querySelectorAll('input[name="skills"]:checked')).map(cb => cb.value);
+      if (skills.length === 0) skills = ["None"];
+      let salaryType = document.getElementById("salaryType").value;
+
+      document.getElementById("previewBox").value =
+        "TCKN: " + tckn + "\n" +
+        "Full Name: " + fullName + "\n" +
+        "Date of Birth: " + dob + "\n" +
+        "Age: " + age + "\n" +
+        "Gender: " + gender + "\n" +
+        "Skills: " + skills.join(", ") + "\n" +
+        "Salary: " + salaryType + " " + salaryAmount + "\n" +
+        "Experience: " + experience;
+      
+      function reject() {
+        document.getElementById("submit_result").textContent = "Application rejected.";
+        document.getElementById("previewBox").value = "";
+      }
+    });
+
+    function computeAge(dobInput) {
+      let dob = new Date(dobInput);
+      let today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      let m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      return age;
+    }
+  </script>
+  <script src="TCKN_validation.js"></script>
+<script src="FullName_validation.js"></script>
+<script src="DOB_validation.js"></script>
+<script src="Salary_validation.js"></script>
+<script src="Experience_validation.js"></script>
+</body>
+</html>
